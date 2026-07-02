@@ -1,0 +1,7 @@
+- main [ref=e2]:
+  - generic "Jogo Missão Estudante Universitário do Futuro" [ref=e3]
+  - generic [ref=e4]:
+    - generic [ref=e5]: "Setas / A D: mover"
+    - generic [ref=e6]: "Espaço / W / Seta para cima: saltar"
+    - generic [ref=e7]: "Seta para baixo / S: agachar"
+    - generic [ref=e8]: "Enter: avançar, iniciar ou reiniciar"

@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.5.5"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.5.6"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -240,11 +240,12 @@ const elementFiles = {
 // Intro splash: a photographic background with a decorative row of NPC
 // students/professionals from `assets/npc/` that fade in one by one.
 const introBackgroundFile = "assets/intro/introbackground.png";
+// `null` keeps a slot's space empty (the row stays evenly spaced, no reflow).
 const introNpcFiles = [
   "assets/npc/student-woman_right.png",
   "assets/npc/architect-man_right.png",
-  "assets/npc/doctor-woman.png",
-  "assets/npc/eng-man.png",
+  "assets/npc/doctor-woman_right.png",
+  null,
   "assets/npc/arts-woman.png",
   "assets/npc/teacher-man.png",
   "assets/npc/nurse-woman.png",
@@ -313,7 +314,7 @@ function loadAssets() {
   }
   loaded.intro = {
     background: loadImage(introBackgroundFile),
-    npcs: introNpcFiles.map((src) => loadImage(src)),
+    npcs: introNpcFiles.map((src) => (src ? loadImage(src) : null)),
   };
   const loadFrameSet = (frames) => ({
     idle: loadImage(frames.idle),

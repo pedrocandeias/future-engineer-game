@@ -4,6 +4,14 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.5.6] — 2026-07-06
+
+feat(intro): virar o 3.º NPC à direita e esvaziar o 4.º lugar
+
+- Trocar o terceiro NPC da intro para `doctor-woman_right.png`.
+- Remover o quarto NPC (eng-man) e manter o lugar vazio (`null`), sem
+  reorganizar a fila — os restantes mantêm a posição.
+
 ## [0.5.5] — 2026-07-06
 
 feat(intro): usar as variantes "_right" dos primeiros NPCs

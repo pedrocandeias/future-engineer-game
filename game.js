@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.6.4"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.7.0"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -30,6 +30,21 @@ const enemyFiles = [
   "deadline.png", "info-overload.png", "self-doubt.png", "comparison.png",
   "negative-comments.png", "uncertainty.png", "disconnection.png", "maintenance.png",
 ];
+// Portuguese display names shown in the balloon when an enemy hits the player.
+const enemyNames = {
+  "distraction.png": "DISTRAÇÃO",
+  "procrastinator.png": "PROCRASTINAÇÃO",
+  "burnout.png": "BURNOUT",
+  "stress.png": "STRESS",
+  "deadline.png": "PRAZO APERTADO",
+  "info-overload.png": "EXCESSO DE INFORMAÇÃO",
+  "self-doubt.png": "INSEGURANÇA",
+  "comparison.png": "COMPARAÇÃO",
+  "negative-comments.png": "COMENTÁRIOS NEGATIVOS",
+  "uncertainty.png": "INCERTEZA",
+  "disconnection.png": "DESLIGAÇÃO",
+  "maintenance.png": "MANUTENÇÃO",
+};
 
 const avatarOptions = [
   { id: "student", label: "ESTUDANTE", type: "player" },
@@ -420,6 +435,7 @@ function reset() {
     skills: skillData.map((skill) => ({ ...skill, y: groundY - 118, taken: false })),
     particles: [],
     winStartTime: 0,
+    hitPause: null, // { name, ttl } — brief blinking freeze after an enemy hit
     // low kinds (y = groundY-55): player must jump over
     // high kinds (y = groundY-105): player must crouch under
     distractions: [
@@ -662,6 +678,13 @@ function update() {
 
   if (state.mode !== "playing") return;
 
+  // After an enemy hit, freeze gameplay for a short blinking pause.
+  if (state.hitPause) {
+    state.hitPause.ttl -= 1;
+    if (state.hitPause.ttl <= 0) state.hitPause = null;
+    return;
+  }
+
   const p = state.player;
   const left = actionActive("left");
   const right = actionActive("right");
@@ -726,7 +749,7 @@ function update() {
           state.mode = "gameover";
           state.gameoverReason = "distractions";
         } else {
-          state.toast = { title: "DISTRAÇÃO!", body: "Mantém o foco na tua missão!", ttl: 140 };
+          state.hitPause = { name: enemyNames[d.enemy] || "DISTRAÇÃO", ttl: 96 };
         }
         break;
       }
@@ -802,6 +825,7 @@ function draw() {
   drawDistractions();
   drawSkills();
   drawPlayer();
+  drawHitBalloon();
   drawHud();
   drawToast();
   if (state.mode === "won") { drawParticles(); drawWin(); }
@@ -1976,8 +2000,10 @@ function drawSkillGlyph(x, y, icon) {
 }
 
 function drawPlayer() {
-  // Flash every 6 frames while invincible — skips every other 6-frame block.
-  if (!godMode && state.invincible > 0 && Math.floor(state.invincible / 6) % 2 === 0) return;
+  // Flash every 6 frames while invincible. During the hit pause `invincible` is
+  // frozen, so drive the blink off the pause countdown instead.
+  const flashCounter = state.hitPause ? state.hitPause.ttl : state.invincible;
+  if (!godMode && flashCounter > 0 && Math.floor(flashCounter / 6) % 2 === 0) return;
   const p = state.player;
   if (godMode) {
     ctx.save();
@@ -2306,6 +2332,42 @@ function drawParticles() {
     }
   }
   ctx.globalAlpha = 1;
+}
+
+/**
+ * Speech balloon above the player naming the enemy that hit it. Blinks during
+ * the short `hitPause` freeze that follows a hit.
+ */
+function drawHitBalloon() {
+  if (!state.hitPause) return;
+  // The balloon stays steady (readable); the player blinks during the pause.
+
+  const p = state.player;
+  const cx = p.x - state.camera + 21; // player centre in screen space
+  const name = state.hitPause.name;
+
+  ctx.font = `700 15px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
+  const nameW = ctx.measureText(name).width;
+  ctx.font = `700 10px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
+  const labelW = ctx.measureText("APANHADO POR").width;
+  const w = Math.max(nameW, labelW) + 30;
+  const h = 38;
+  const x = Math.max(8, Math.min(W - w - 8, cx - w / 2));
+  const y = p.y - 82;
+
+  drawPixelPanel(x, y, w, h, 8);
+  // Tail pointing down to the player.
+  const tx = Math.max(x + 14, Math.min(x + w - 14, cx));
+  ctx.fillStyle = "#030303";
+  ctx.beginPath();
+  ctx.moveTo(tx - 8, y + h - 2);
+  ctx.lineTo(tx + 8, y + h - 2);
+  ctx.lineTo(tx, y + h + 12);
+  ctx.closePath();
+  ctx.fill();
+
+  pixelText("APANHADO POR", x + w / 2, y + 13, 10, "#ffb3b3", "center");
+  pixelText(name, x + w / 2, y + 27, 15, "#ff5c5c", "center");
 }
 
 function drawWin() {

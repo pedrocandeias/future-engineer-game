@@ -4,6 +4,17 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.7.0] — 2026-07-06
+
+feat(game): balão do inimigo e pausa a piscar ao ser atingido
+
+- Ao ser atingido por um inimigo (sem perder a última vida), mostrar um balão de
+  fala por cima do jogador a dizer que inimigo foi ("APANHADO POR …"), com nomes
+  em português por tipo de inimigo (`enemyNames`).
+- Congelar a jogabilidade durante uma breve pausa (`state.hitPause`, ~1,6s) em
+  que o jogador pisca, antes de se poder voltar a mover. Substitui o antigo toast
+  genérico de "DISTRAÇÃO!".
+
 ## [0.6.4] — 2026-07-06
 
 polish(win): aproximar o ecrã de fim de nível ao ecrã inicial

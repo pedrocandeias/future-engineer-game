@@ -558,7 +558,8 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     if (state.mode === "intro") goToCharacterSelect();
     else if (state.mode === "characterSelect") goToLevelSelect();
-    else if (state.mode === "won") goToLevelSelect();
+    else if (state.mode === "won") afterWin();
+    else if (state.mode === "finale") finishFinale();
     else if (state.mode === "levelSelect" || state.mode === "gameover") resetGameToPlaying();
   }
 
@@ -594,7 +595,7 @@ canvas.addEventListener("pointerdown", (event) => {
       return;
     }
   }
-  if (state.mode === "intro" || state.mode === "characterSelect" || state.mode === "levelSelect" || state.mode === "won" || state.mode === "gameover") {
+  if (state.mode === "intro" || state.mode === "characterSelect" || state.mode === "levelSelect" || state.mode === "won" || state.mode === "finale" || state.mode === "gameover") {
     event.preventDefault();
     if (state.mode === "intro") {
       const point = getCanvasPoint(event);
@@ -634,7 +635,8 @@ canvas.addEventListener("pointerdown", (event) => {
       }
       return;
     }
-    if (state.mode === "won") goToLevelSelect();
+    if (state.mode === "won") afterWin();
+    else if (state.mode === "finale") finishFinale();
     else resetGameToPlaying();
   }
 });
@@ -648,7 +650,8 @@ for (const button of document.querySelectorAll("[data-action]")) {
     if (action === "start") {
       if (state.mode === "intro") goToCharacterSelect();
       else if (state.mode === "characterSelect") goToLevelSelect();
-      else if (state.mode === "won") goToLevelSelect();
+      else if (state.mode === "won") afterWin();
+      else if (state.mode === "finale") finishFinale();
       else if (state.mode === "levelSelect" || state.mode === "gameover") resetGameToPlaying();
       return;
     }
@@ -691,6 +694,23 @@ function goToLevelSelect() {
   state.mode = "levelSelect";
 }
 
+/** After a win: show the finale if every level is done, else back to level select. */
+function afterWin() {
+  if (completedLevels.size >= levelData.length) {
+    state.mode = "finale";
+    state.finaleTime = state.time;
+    for (let i = 0; i < 8; i += 1) spawnBurst(W * (0.08 + i * 0.12), 70 + Math.random() * 200);
+  } else {
+    goToLevelSelect();
+  }
+}
+
+/** Leaving the finale starts a fresh run: clear progress and pick a character. */
+function finishFinale() {
+  completedLevels.clear();
+  goToCharacterSelect();
+}
+
 function goToAvatarSelect() {
   state.mode = "avatarSelect";
 }
@@ -726,9 +746,8 @@ function actionActive(action) {
 function update() {
   state.time += 1 / 60;
 
-  if (state.mode === "won") {
-    const elapsed = (state.time - state.winStartTime) * 60;
-    if (Math.floor(elapsed) % 55 === 0) spawnBurst(80 + Math.random() * (W - 160), 60 + Math.random() * 200);
+  if (state.mode === "won" || state.mode === "finale") {
+    if (Math.floor(state.time * 60) % 55 === 0) spawnBurst(80 + Math.random() * (W - 160), 60 + Math.random() * 200);
     if (Math.random() < 0.3) spawnConfetti();
     for (const p of state.particles) {
       p.x += p.vx; p.y += p.vy;
@@ -893,6 +912,7 @@ function draw() {
   drawHud();
   drawToast();
   if (state.mode === "won") { drawParticles(); drawWin(); }
+  if (state.mode === "finale") { drawParticles(); drawFinale(); }
   if (state.mode === "gameover") drawGameOver();
   drawFrameEffects();
 }
@@ -2565,6 +2585,59 @@ function drawWin() {
   }
   if (elapsed > 260 && Math.sin(state.time * 5) > -0.2) {
     pixelText("ENTER / COMEÇAR PARA ESCOLHER OUTRO NÍVEL", W / 2, panelY + 158, 15, "#f6c85a", "center");
+  }
+}
+
+/** Final panel shown when every level has been completed. */
+function drawFinale() {
+  const elapsed = (state.time - state.finaleTime) * 60;
+
+  const bg = assets.intro.background;
+  if (imageReady(bg)) {
+    drawImageClean(bg, 0, 0, W, H);
+  } else {
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#0a1830");
+    grad.addColorStop(1, "#04264a");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  }
+  ctx.fillStyle = "rgba(3, 8, 20, 0.55)";
+  ctx.fillRect(0, 0, W, H);
+
+  drawWinNpcs(elapsed);
+
+  ctx.globalAlpha = Math.min(1, elapsed / 40);
+  drawBlockText([
+    { text: "U.PORTO", color: "#f0e4cc" },
+    { text: "QUEST", color: "#f6a41e" },
+  ], W / 2, 68, 46);
+  ctx.globalAlpha = 1;
+
+  const panelW = 640;
+  const panelX = W / 2 - panelW / 2;
+  const panelY = 116;
+  const panelH = 206;
+  drawPixelPanel(panelX, panelY, panelW, panelH, 12);
+
+  neonText("MISSÃO COMPLETA!", W / 2, panelY + 34, 26, "#7dff4b", "center");
+  pixelText("Completaste todos os níveis da U.Porto!", W / 2, panelY + 70, 17, "#eef4ff", "center");
+
+  // Checklist of the completed levels (2 rows: 4 + 3).
+  const firstRow = 4;
+  const itemW = 154;
+  for (let i = 0; i < levelData.length; i += 1) {
+    const row = i < firstRow ? 0 : 1;
+    const cols = row === 0 ? firstRow : levelData.length - firstRow;
+    const col = row === 0 ? i : i - firstRow;
+    const rx = W / 2 - (cols * itemW) / 2 + col * itemW + itemW / 2;
+    const ry = panelY + 106 + row * 28;
+    pixelText(`✓ ${levelData[i].label}`, rx, ry, 12, "#7dff4b", "center");
+  }
+
+  pixelText("Estás pronto para o teu futuro na U.Porto.", W / 2, panelY + 174, 15, "#8fd1ff", "center");
+  if (elapsed > 120 && Math.sin(state.time * 5) > -0.2) {
+    pixelText("ENTER / TOCA PARA JOGAR DE NOVO", W / 2, panelY + panelH - 16, 15, "#f6c85a", "center");
   }
 }
 

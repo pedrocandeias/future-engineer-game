@@ -4,6 +4,17 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.9.0] — 2026-07-06
+
+feat(game): painel final ao completar todos os níveis
+
+- Adicionar um ecrã final celebrativo (modo `finale`) quando o jogador completa
+  os 7 níveis: título "U.PORTO QUEST" / "MISSÃO COMPLETA!", lista dos níveis com
+  vistos verdes, mensagem de parabéns, NPCs a celebrar e confetes.
+- Ao vencer o último nível em falta, o ecrã de vitória passa a levar ao painel
+  final (em vez do seletor); "jogar de novo" limpa o progresso e volta à seleção
+  de personagem (`afterWin()` / `finishFinale()` / `drawFinale()`).
+
 ## [0.8.1] — 2026-07-06
 
 fix(mobile): controlos compactos e sem botão inútil

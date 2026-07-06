@@ -4,6 +4,17 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.6.4] — 2026-07-06
+
+polish(win): aproximar o ecrã de fim de nível ao ecrã inicial
+
+- Redesenhar o ecrã de vitória com o visual da intro: fundo do campus, título
+  em bloco a duas cores "MISSÃO CUMPRIDA!", e um painel escuro (estilo caixa de
+  boas-vindas) com a mensagem, as recompensas recolhidas e o "QUERES JOGAR DE
+  NOVO?".
+- Usar os NPCs atuais (`assets/npc/`) a celebrar na fila de baixo, em vez dos
+  antigos props (`drawWinNpcs()`).
+
 ## [0.6.3] — 2026-07-06
 
 fix(scene): aumentar o tamanho dos quadros

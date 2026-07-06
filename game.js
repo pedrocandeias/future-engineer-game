@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.6.3"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.6.4"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -2311,67 +2311,101 @@ function drawParticles() {
 function drawWin() {
   const elapsed = (state.time - state.winStartTime) * 60;
 
-  ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+  // Intro-style backdrop: the campus background with a soft scrim for legibility.
+  const bg = assets.intro.background;
+  if (imageReady(bg)) {
+    drawImageClean(bg, 0, 0, W, H);
+  } else {
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#0a1830");
+    grad.addColorStop(1, "#04264a");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  }
+  ctx.fillStyle = "rgba(3, 8, 20, 0.5)";
   ctx.fillRect(0, 0, W, H);
 
-  // Title fades in over first 40 frames
+  // Current NPCs celebrate along the bottom (same row style as the intro).
+  drawWinNpcs(elapsed);
+
+  // Blocky celebration title, like the intro logo.
   ctx.globalAlpha = Math.min(1, elapsed / 40);
-  const pulse = Math.sin(state.time * 4) * 2;
-  neonText("TODAS AS COMPETÊNCIAS ADQUIRIDAS!", W / 2, 90, 23 + pulse, "#7dff4b", "center");
+  drawBlockText([
+    { text: "MISSÃO", color: "#f0e4cc" },
+    { text: "CUMPRIDA!", color: "#7dff4b" },
+  ], W / 2, 78, 50);
   ctx.globalAlpha = 1;
 
-  // NPCs slide up and fade in, staggered
-  const npcDefs = [
-    { key: "professor",     x: 180 },
-    { key: "worker",        x: 370 },
-    { key: "studentBlonde", x: 570 },
-    { key: "studentBlack",  x: 760 },
-  ];
-  const npcH = 140;
-  const npcFootY = 480;
-  for (let i = 0; i < npcDefs.length; i++) {
-    const t = Math.min(1, Math.max(0, (elapsed - (50 + i * 35)) / 35));
-    if (t <= 0) continue;
-    const img = assets.props[npcDefs[i].key];
-    const slideY = npcFootY - npcH + (1 - t) * 40;
-    ctx.globalAlpha = t;
-    if (imageReady(img)) {
-      const npcW = (img.naturalWidth / img.naturalHeight) * npcH;
-      ctx.drawImage(img, npcDefs[i].x - npcW / 2, slideY, npcW, npcH);
-    }
-    ctx.globalAlpha = 1;
-  }
+  // Dark "welcome box"-style panel with the message, skills and prompt.
+  const panelW = 620;
+  const panelX = W / 2 - panelW / 2;
+  const panelY = 138;
+  const panelH = 176;
+  drawPixelPanel(panelX, panelY, panelW, panelH, 12);
+  pixelText("TODAS AS COMPETÊNCIAS ADQUIRIDAS!", W / 2, panelY + 30, 18, "#8fd1ff", "center");
 
-  // Skills fade in one by one
-  for (let i = 0; i < state.skills.length; i++) {
-    const t = Math.min(1, Math.max(0, (elapsed - (185 + i * 18)) / 25));
+  // Collected skills fade in one by one, centred in the panel.
+  const n = state.skills.length;
+  const skillSize = 40;
+  const skillGap = 8;
+  const rowW = n * skillSize + (n - 1) * skillGap;
+  const rowStartX = W / 2 - rowW / 2;
+  for (let i = 0; i < n; i += 1) {
+    const t = clamp01((elapsed - (60 + i * 16)) / 25);
     if (t <= 0) continue;
     const skill = state.skills[i];
     const image = assets.skills[skill.image];
-    const size = 48;
-    const x = 105 + i * 96;
+    const x = rowStartX + i * (skillSize + skillGap);
     ctx.save();
     ctx.globalAlpha = t;
     ctx.shadowColor = skill.color;
     ctx.shadowBlur = 14;
     if (imageReady(image)) {
-      ctx.drawImage(image, x, 310 - size / 2, size, size);
+      ctx.drawImage(image, x, panelY + 60, skillSize, skillSize);
     } else {
       ctx.fillStyle = skill.color;
-      ctx.fillRect(x, 310 - size / 2, size, size);
+      ctx.fillRect(x, panelY + 60, skillSize, skillSize);
     }
     ctx.restore();
   }
 
-  // Body text, "play again?" prompt, and press-enter to pick another level.
-  if (elapsed > 360) {
-    ctx.globalAlpha = Math.min(1, (elapsed - 360) / 30);
-    pixelText("ESTÁS PRONTO PARA O FUTURO UNIVERSITÁRIO.", W / 2, 168, 18, "#ffffff", "center");
-    neonText("QUERES JOGAR DE NOVO?", W / 2, 205, 22, "#7dff4b", "center");
+  // "Play again?" prompt and the instruction to pick another level.
+  if (elapsed > 200) {
+    ctx.globalAlpha = clamp01((elapsed - 200) / 30);
+    neonText("QUERES JOGAR DE NOVO?", W / 2, panelY + 128, 22, "#7dff4b", "center");
     ctx.globalAlpha = 1;
   }
-  if (elapsed > 420 && Math.sin(state.time * 5) > -0.2) {
-    pixelText("ENTER / COMEÇAR PARA ESCOLHER OUTRO NÍVEL", W / 2, 240, 16, "#8fd1ff", "center");
+  if (elapsed > 260 && Math.sin(state.time * 5) > -0.2) {
+    pixelText("ENTER / COMEÇAR PARA ESCOLHER OUTRO NÍVEL", W / 2, panelY + 158, 15, "#f6c85a", "center");
+  }
+}
+
+/** Celebration NPC row (current NPCs) sliding/fading in along the bottom. */
+function drawWinNpcs(elapsed) {
+  const npcs = assets.intro.npcs;
+  const count = npcs.length;
+  const rowHeight = 150;
+  const bottomY = H - 6;
+  const slotWidth = W / count;
+  for (let i = 0; i < count; i += 1) {
+    const image = npcs[i];
+    if (!imageReady(image)) continue;
+    const t = clamp01((elapsed - (40 + i * 22)) / 30);
+    if (t <= 0) continue;
+    const aspect = image.naturalWidth / image.naturalHeight;
+    let drawH = rowHeight;
+    let drawW = drawH * aspect;
+    const maxW = slotWidth - 6;
+    if (drawW > maxW) {
+      drawW = maxW;
+      drawH = drawW / aspect;
+    }
+    const cx = slotWidth * (i + 0.5);
+    const rise = (1 - t) * 30;
+    ctx.save();
+    ctx.globalAlpha = t;
+    drawImageClean(image, cx - drawW / 2, bottomY - drawH + rise, drawW, drawH);
+    ctx.restore();
   }
 }
 

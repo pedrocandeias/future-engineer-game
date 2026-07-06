@@ -4,6 +4,16 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.5.4] — 2026-07-06
+
+feat(game): god mode (Konami) troca a personagem para a versão "super"
+
+- Ao ativar o código Konami (god mode), o sprite do jogador passa a usar a
+  versão "super" (herói) de cada personagem, de `assets/personagens/` (idle/
+  step1/step2/jump/crawl), voltando ao normal quando o god mode é desativado.
+- Carregar os frames "super" de cada personagem (`superFrames`) além dos
+  normais; `getCharacterFrame` escolhe o conjunto conforme `godMode`.
+
 ## [0.5.3] — 2026-07-06
 
 fix(game): plantar a personagem, NPCs, rewards e inimigos um pouco mais abaixo

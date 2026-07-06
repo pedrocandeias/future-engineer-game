@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.5.3"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.5.4"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -48,30 +48,55 @@ const characterOptions = [
     walk: ["assets/personagens/personagem_1/teacher-step1.png", "assets/personagens/personagem_1/teacher-idle.png"],
     jump: "assets/personagens/personagem_1/teacher-jump.png",
     crouch: "assets/personagens/personagem_1/teacher-crawl.png",
+  }, superFrames: {
+    idle: "assets/personagens/personagem_1/super-teacher-idle.png",
+    walk: ["assets/personagens/personagem_1/super-teacher-step1.png", "assets/personagens/personagem_1/super-teacher-step2.png"],
+    jump: "assets/personagens/personagem_1/super-teacher-jump.png",
+    crouch: "assets/personagens/personagem_1/teacher-super-crawl.png",
   } },
   { id: "estudante", label: "ESTUDANTE", image: "assets/personagens/personagem_2/student-woman-idle.png", frames: {
     idle: "assets/personagens/personagem_2/student-woman-idle.png",
     walk: ["assets/personagens/personagem_2/student-woman-step1.png", "assets/personagens/personagem_2/student-woman-step2.png"],
     jump: "assets/personagens/personagem_2/student-woman-jump.png",
     crouch: "assets/personagens/personagem_2/student-woman-crawl.png",
+  }, superFrames: {
+    idle: "assets/personagens/personagem_2/super-student-woman-idle.png",
+    walk: ["assets/personagens/personagem_2/super-student-woman-step1.png", "assets/personagens/personagem_2/super-student-woman-step2.png"],
+    jump: "assets/personagens/personagem_2/super-student-woman-jump.png",
+    crouch: "assets/personagens/personagem_2/super-student-woman-crawl.png",
   } },
   { id: "programador", label: "PROGRAMADOR", image: "assets/personagens/personagem_3/student-man-it-idle.png", frames: {
     idle: "assets/personagens/personagem_3/student-man-it-idle.png",
     walk: ["assets/personagens/personagem_3/student-man-it-step1.png", "assets/personagens/personagem_3/student-man-it-step2.png"],
     jump: "assets/personagens/personagem_3/student-man-it-jump.png",
     crouch: "assets/personagens/personagem_3/student-man-it-crawl.png",
+  }, superFrames: {
+    idle: "assets/personagens/personagem_3/super-student-man-it-idle.png",
+    walk: ["assets/personagens/personagem_3/super-student-man-it-step2.png"],
+    jump: "assets/personagens/personagem_3/super-student-man-it-jump.png",
+    crouch: "assets/personagens/personagem_3/super-student-man-it-crawl.png",
   } },
   { id: "colega", label: "ESTUDANTE", image: "assets/personagens/personagem_4/student-wheelchair-idle.png", frames: {
     idle: "assets/personagens/personagem_4/student-wheelchair-idle.png",
     walk: ["assets/personagens/personagem_4/student-wheelchair-step1.png", "assets/personagens/personagem_4/student-wheelchair-step2.png"],
     jump: "assets/personagens/personagem_4/student-wheelchair-jump.png",
     crouch: "assets/personagens/personagem_4/student-wheelchair-crawl.png",
+  }, superFrames: {
+    idle: "assets/personagens/personagem_4/super-student-wheelchair-idle.png",
+    walk: ["assets/personagens/personagem_4/super-student-wheelchair-step1.png", "assets/personagens/personagem_4/super-student-wheelchair-step2.png"],
+    jump: "assets/personagens/personagem_4/super-student-wheelchair-jump.png",
+    crouch: "assets/personagens/personagem_4/super-student-wheelchair-crawl.png",
   } },
   { id: "caloiro", label: "CALOIRO", image: "assets/personagens/personagem_5/student-man-2-idle.png", frames: {
     idle: "assets/personagens/personagem_5/student-man-2-idle.png",
     walk: ["assets/personagens/personagem_5/student-man-2-step1.png", "assets/personagens/personagem_5/student-man-2-step2.png"],
     jump: "assets/personagens/personagem_5/student-man-2-jump.png",
     crouch: "assets/personagens/personagem_5/student-man-2-crawl.png",
+  }, superFrames: {
+    idle: "assets/personagens/personagem_5/super-student-man-2-idle.png",
+    walk: ["assets/personagens/personagem_5/super-student-man-2-step1.png", "assets/personagens/personagem_5/super-student-man-2-step2.png"],
+    jump: "assets/personagens/personagem_5/super-student-man-2-jump.png",
+    crouch: "assets/personagens/personagem_5/super-student-man-2-crawl.png",
   } },
 ];
 let selectedCharacterIndex = 0;
@@ -290,11 +315,15 @@ function loadAssets() {
     background: loadImage(introBackgroundFile),
     npcs: introNpcFiles.map((src) => loadImage(src)),
   };
+  const loadFrameSet = (frames) => ({
+    idle: loadImage(frames.idle),
+    walk: frames.walk.map(loadImage),
+    jump: loadImage(frames.jump),
+    crouch: loadImage(frames.crouch),
+  });
   loaded.playCharacters = characterOptions.map((option) => ({
-    idle: loadImage(option.frames.idle),
-    walk: option.frames.walk.map(loadImage),
-    jump: loadImage(option.frames.jump),
-    crouch: loadImage(option.frames.crouch),
+    ...loadFrameSet(option.frames),
+    super: loadFrameSet(option.superFrames), // used while god mode (Konami) is active
   }));
   loaded.characterSelect = loaded.playCharacters.map((set) => set.idle); // reuse the idle frames
   loaded.npcPool = allNpcFiles.map((file) => loadImage(`assets/npc/${file}`));
@@ -2090,7 +2119,10 @@ function hasCharacterFrames() {
 }
 
 function getCharacterFrame(step, grounded) {
-  const set = assets.playCharacters[selectedCharacterIndex];
+  const character = assets.playCharacters[selectedCharacterIndex];
+  // God mode (Konami) swaps to the "super" sprite set — fall back to normal if
+  // a super frame hasn't loaded yet.
+  const set = (godMode && character.super) ? character.super : character;
   const moving = Math.abs(state.player.vx) > 0.1;
   if (state.player.crouching && imageReady(set.crouch)) return set.crouch;
   if (!grounded && imageReady(set.jump)) return set.jump;
@@ -2099,7 +2131,7 @@ function getCharacterFrame(step, grounded) {
   const readyWalk = set.walk.filter(imageReady);
   if (readyWalk.length) return readyWalk[Math.floor(step * 0.45) % readyWalk.length];
 
-  return set.idle;
+  return imageReady(set.idle) ? set.idle : character.idle;
 }
 
 function drawHud() {

@@ -4,6 +4,13 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.6.3] — 2026-07-06
+
+fix(scene): aumentar o tamanho dos quadros
+
+- Aumentar a altura de render dos quadros (wall art) de 92 → 130 px, ficando
+  mais destacados na parede.
+
 ## [0.6.2] — 2026-07-06
 
 fix(scene): descer os quadros e subir as portas

@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.7.1"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.7.0"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -102,7 +102,7 @@ const characterOptions = [
     jump: "assets/personagens/personagem_4/super-student-wheelchair-jump.png",
     crouch: "assets/personagens/personagem_4/super-student-wheelchair-crawl.png",
   } },
-  { id: "caloiro", label: "CALOIRO", color: "#ffc949", image: "assets/personagens/personagem_5/student-man-2-idle.png", frames: {
+  { id: "caloiro", label: "CALOIRO", image: "assets/personagens/personagem_5/student-man-2-idle.png", frames: {
     idle: "assets/personagens/personagem_5/student-man-2-idle.png",
     walk: ["assets/personagens/personagem_5/student-man-2-step1.png", "assets/personagens/personagem_5/student-man-2-step2.png"],
     jump: "assets/personagens/personagem_5/student-man-2-jump.png",
@@ -187,6 +187,43 @@ const allNpcFiles = [
   "eng-woman.png", "it-woman.png", "nurse-man.png", "nurse-woman.png", "office-man.png",
   "office-woman.png", "student-man.png", "student-woman.png", "teacher-man.png", "teacher-woman.png",
 ];
+
+// World-x positions of the scenery NPCs (shared by the drawer and the curiosity
+// balloons). Each NPC shows one U.Porto curiosity when the player passes it.
+const sceneNpcXs = [260, 900, 1600, 2300, 3020, 3740];
+const upAboutUrl = "https://www.up.pt/acesso/conhece-a-universidade-do-porto/";
+const upSupportUrl = "https://www.up.pt/acesso/sempre-contigo/";
+// NOTE: factos gerais/públicos da U.Porto (as páginas oficiais bloquearam o
+// acesso automático). Revê os números se necessário.
+const npcCuriosities = [
+  { text: "A U.Porto foi fundada em 1911 e é uma das maiores universidades do país.", url: upAboutUrl },
+  { text: "A U.Porto tem 14 faculdades e uma escola de negócios.", url: upAboutUrl },
+  { text: "Estudam na U.Porto cerca de 30 000 estudantes, de mais de 100 países.", url: upAboutUrl },
+  { text: "A Faculdade de Engenharia (FEUP) é a maior faculdade da U.Porto.", url: upAboutUrl },
+  { text: "A U.Porto tem uma forte ligação à investigação e à inovação.", url: upAboutUrl },
+  { text: "A U.Porto forma estudantes desde as artes às ciências da saúde.", url: upAboutUrl },
+  { text: "A Reitoria da U.Porto ocupa um edifício histórico no centro do Porto.", url: upAboutUrl },
+  { text: "A U.Porto tem residências, bolsas e apoio social para os estudantes.", url: upSupportUrl },
+  { text: "Há apoio psicológico, desporto e cultura para os estudantes da U.Porto.", url: upSupportUrl },
+  { text: "A U.Porto recebe estudantes de todo o mundo em mobilidade internacional.", url: upSupportUrl },
+];
+
+/** N distinct random indices in [0, poolLen) (cycles if the pool is smaller). */
+function pickDistinct(poolLen, count) {
+  const idx = Array.from({ length: poolLen }, (_, i) => i);
+  for (let i = idx.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  return Array.from({ length: count }, (_, i) => idx[i % idx.length]);
+}
+
+/** Randomly assign an NPC sprite and a curiosity to each scenery NPC position. */
+function makeSceneNpcs() {
+  const npcIdx = pickDistinct(assets.npcPool.length, sceneNpcXs.length);
+  const curIdx = pickDistinct(npcCuriosities.length, sceneNpcXs.length);
+  return sceneNpcXs.map((_, i) => ({ img: npcIdx[i], curiosity: curIdx[i] }));
+}
 
 const avatarFrameFiles = {
   idle: ["idle.png"],
@@ -283,6 +320,9 @@ let state;
 const KONAMI = ["arrowup","arrowup","arrowdown","arrowdown","arrowleft","arrowright","arrowleft","arrowright","b","a"];
 const cheatBuffer = [];
 let godMode = false;
+// Screen-space rect + url of the currently shown NPC curiosity balloon's link
+// (null when none is visible). Read by the pointer handlers to open the link.
+let activeCuriosityLink = null;
 
 function selectAvatar(direction) {
   selectedAvatarIndex = (selectedAvatarIndex + direction + avatarOptions.length) % avatarOptions.length;
@@ -438,20 +478,22 @@ function reset() {
     hitPause: null, // { name, ttl } — brief blinking freeze after an enemy hit
     // low kinds (y = groundY-55): player must jump over
     // high kinds (y = groundY-105): player must crouch under
+    // Distractions are kept out of the NPC "reading zones" (sceneNpcXs ± ~200)
+    // so the player can stop by an NPC and read its curiosity balloon.
     distractions: [
-      { startX: 700,  x: 700,  y: groundY -  55, w: 44, h: 44, vx: 1.4, dir:  1, range: 100, kind: "phone" },
-      { startX: 860,  x: 860,  y: groundY - 105, w: 44, h: 44, vx: 1.2, dir: -1, range:  90, kind: "sleep" },
-      { startX: 1080, x: 1080, y: groundY -  55, w: 44, h: 44, vx: 1.6, dir:  1, range: 100, kind: "heart" },
-      { startX: 1260, x: 1260, y: groundY - 105, w: 44, h: 44, vx: 1.3, dir: -1, range:  90, kind: "chat"  },
-      { startX: 1500, x: 1500, y: groundY -  55, w: 44, h: 44, vx: 1.8, dir:  1, range: 100, kind: "phone" },
-      { startX: 1670, x: 1670, y: groundY - 105, w: 44, h: 44, vx: 1.4, dir: -1, range:  90, kind: "sleep" },
-      { startX: 1930, x: 1930, y: groundY -  55, w: 44, h: 44, vx: 1.5, dir:  1, range: 100, kind: "heart" },
-      { startX: 2090, x: 2090, y: groundY - 105, w: 44, h: 44, vx: 1.6, dir: -1, range:  90, kind: "chat"  },
-      { startX: 2340, x: 2340, y: groundY -  55, w: 44, h: 44, vx: 2.0, dir:  1, range: 100, kind: "phone" },
-      { startX: 2510, x: 2510, y: groundY - 105, w: 44, h: 44, vx: 1.7, dir: -1, range:  90, kind: "sleep" },
-      { startX: 2800, x: 2800, y: groundY -  55, w: 44, h: 44, vx: 1.8, dir:  1, range: 100, kind: "heart" },
-      { startX: 2970, x: 2970, y: groundY - 105, w: 44, h: 44, vx: 2.0, dir: -1, range:  90, kind: "chat"  },
+      { startX: 500,  x: 500,  y: groundY -  55, w: 44, h: 44, vx: 1.4, dir:  1, range:  90, kind: "phone" },
+      { startX: 620,  x: 620,  y: groundY - 105, w: 44, h: 44, vx: 1.2, dir: -1, range:  70, kind: "sleep" },
+      { startX: 1140, x: 1140, y: groundY -  55, w: 44, h: 44, vx: 1.6, dir:  1, range: 100, kind: "heart" },
+      { startX: 1290, x: 1290, y: groundY - 105, w: 44, h: 44, vx: 1.3, dir: -1, range:  90, kind: "chat"  },
+      { startX: 1840, x: 1840, y: groundY -  55, w: 44, h: 44, vx: 1.8, dir:  1, range: 100, kind: "phone" },
+      { startX: 1990, x: 1990, y: groundY - 105, w: 44, h: 44, vx: 1.4, dir: -1, range:  90, kind: "sleep" },
+      { startX: 2540, x: 2540, y: groundY -  55, w: 44, h: 44, vx: 1.5, dir:  1, range: 100, kind: "heart" },
+      { startX: 2690, x: 2690, y: groundY - 105, w: 44, h: 44, vx: 1.6, dir: -1, range:  90, kind: "chat"  },
+      { startX: 3260, x: 3260, y: groundY -  55, w: 44, h: 44, vx: 2.0, dir:  1, range: 100, kind: "phone" },
+      { startX: 3410, x: 3410, y: groundY - 105, w: 44, h: 44, vx: 1.7, dir: -1, range:  90, kind: "sleep" },
     ],
+    // Random NPC + curiosity per position, reshuffled each play/level.
+    sceneNpcs: makeSceneNpcs(),
   };
   // Assign an enemy sprite to each distraction, cycling through the set.
   state.distractions.forEach((d, i) => { d.enemy = enemyFiles[i % enemyFiles.length]; });
@@ -530,7 +572,28 @@ window.addEventListener("keydown", (event) => {
 
 window.addEventListener("keyup", (event) => keys.delete(event.key.toLowerCase()));
 
+// Show a pointer cursor when hovering an NPC curiosity balloon's link.
+canvas.addEventListener("pointermove", (event) => {
+  let over = false;
+  if (state.mode === "playing" && activeCuriosityLink) {
+    const point = getCanvasPoint(event);
+    const r = activeCuriosityLink;
+    over = point.x >= r.x && point.x <= r.x + r.w && point.y >= r.y && point.y <= r.y + r.h;
+  }
+  canvas.style.cursor = over ? "pointer" : "default";
+});
+
 canvas.addEventListener("pointerdown", (event) => {
+  // Clicking an NPC curiosity balloon opens its "saber mais" link in a new tab.
+  if (state.mode === "playing" && activeCuriosityLink) {
+    const point = getCanvasPoint(event);
+    const r = activeCuriosityLink;
+    if (point.x >= r.x && point.x <= r.x + r.w && point.y >= r.y && point.y <= r.y + r.h) {
+      event.preventDefault();
+      window.open(r.url, "_blank", "noopener");
+      return;
+    }
+  }
   if (state.mode === "intro" || state.mode === "characterSelect" || state.mode === "levelSelect" || state.mode === "won" || state.mode === "gameover") {
     event.preventDefault();
     if (state.mode === "intro") {
@@ -826,6 +889,7 @@ function draw() {
   drawSkills();
   drawPlayer();
   drawHitBalloon();
+  drawNpcCuriosities();
   drawHud();
   drawToast();
   if (state.mode === "won") { drawParticles(); drawWin(); }
@@ -1181,7 +1245,7 @@ function drawCharacterPicker() {
     const option = characterOptions[i];
     const selected = i === selectedCharacterIndex;
 
-    drawGradientCard(rect, option.color, selected);
+    drawPixelPanel(rect.x, rect.y, rect.w, rect.h, selected ? 8 : 6);
     if (selected) {
       ctx.strokeStyle = "#ffcb3e";
       ctx.lineWidth = 3;
@@ -1281,9 +1345,7 @@ function drawLevelSelect() {
  * Card panel for a level: a soft top-lit gradient faintly tinted with the
  * level's own colour (a "display case" look), plus the pixel-UI borders.
  */
-// Rounded card panel with a soft gradient tinted by `color` — used by the level
-// and character pickers.
-function drawGradientCard(rect, color, selected) {
+function drawLevelCardPanel(rect, color, selected) {
   const radius = selected ? 8 : 6;
   roundedRectPath(rect.x, rect.y, rect.w, rect.h, radius);
   ctx.fillStyle = "#141b26";
@@ -1312,7 +1374,7 @@ function drawLevelPicker() {
     const rect = rects[i];
     const selected = i === selectedLevelIndex;
 
-    drawGradientCard(rect, levelData[i].color, selected);
+    drawLevelCardPanel(rect, levelData[i].color, selected);
     if (selected) {
       ctx.strokeStyle = "#ffcb3e";
       ctx.lineWidth = 3;
@@ -1614,10 +1676,14 @@ function drawScene(levelId) {
   // Floor-anchored items on one spaced schedule (doors / props / NPCs interleaved).
   // Doors and props sit against the back wall, so they rest nearer the wall/floor
   // line (a bit above the ground line); NPCs stand out on the floor with the player.
-  const propBase = groundY - 20;
+  const propBase = groundY - 19;
   scatterProps(scene.doors, [380, 1100, 1820, 2540, 3260, 3980], (img, x) => drawFloorImage(img, x, propBase - 10, 178, 1));
   scatterProps(scene.floorProps, [620, 1340, 2060, 2780, 3500], (img, x) => drawFloorImage(img, x, propBase, 116, 1));
-  scatterProps(assets.npcPool, [260, 900, 1600, 2300, 3020, 3740], (img, x) => drawFloorImage(img, x, groundY, 122, 1));
+  // Scenery NPCs: the randomly-chosen sprite for each position this play.
+  for (let i = 0; i < sceneNpcXs.length; i += 1) {
+    const img = assets.npcPool[state.sceneNpcs[i].img];
+    if (imageReady(img)) drawFloorImage(img, sceneNpcXs[i], groundY, 122, 1);
+  }
 
   ctx.restore();
 }
@@ -2334,6 +2400,64 @@ function drawParticles() {
     }
   }
   ctx.globalAlpha = 1;
+}
+
+/**
+ * When the player is near a scenery NPC, show a speech balloon above it with a
+ * U.Porto curiosity and a clickable "SABER MAIS" link. Updates
+ * `activeCuriosityLink` (screen-space) each frame for the pointer handlers.
+ */
+function drawNpcCuriosities() {
+  activeCuriosityLink = null;
+  const p = state.player;
+  for (let i = 0; i < sceneNpcXs.length; i += 1) {
+    const npcX = sceneNpcXs[i];
+    if (Math.abs(p.x + 21 - npcX) > 130) continue; // player centre near the NPC
+    drawCuriosityBalloon(npcX - state.camera, groundY - 128, npcCuriosities[state.sceneNpcs[i].curiosity]);
+    break; // one at a time (NPCs are far apart)
+  }
+}
+
+/** Draw a curiosity balloon whose tail points down to (cx, anchorY) in screen space. */
+function drawCuriosityBalloon(cx, anchorY, cur) {
+  const bodySize = 14;
+  const lineH = 19;
+  const padX = 14;
+  const maxTextW = 250;
+  const lines = wrapText(cur.text, maxTextW, bodySize);
+  const contentW = lines.reduce((m, ln) => {
+    ctx.font = `700 ${bodySize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
+    return Math.max(m, ctx.measureText(ln).width);
+  }, 0);
+  ctx.font = `700 13px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
+  const linkText = "SABER MAIS ▸";
+  const linkW = ctx.measureText(linkText).width;
+
+  const w = Math.min(W - 16, Math.max(contentW, linkW) + padX * 2);
+  const h = 12 + lines.length * lineH + 26;
+  const x = Math.max(8, Math.min(W - w - 8, cx - w / 2));
+  const y = Math.max(72, anchorY - h - 12);
+
+  drawPixelPanel(x, y, w, h, 10);
+
+  // Tail pointing down to the NPC.
+  const tx = Math.max(x + 16, Math.min(x + w - 16, cx));
+  ctx.fillStyle = "#030303";
+  ctx.beginPath();
+  ctx.moveTo(tx - 8, y + h - 2);
+  ctx.lineTo(tx + 8, y + h - 2);
+  ctx.lineTo(tx, y + h + 12);
+  ctx.closePath();
+  ctx.fill();
+
+  let ty = y + 12 + lineH / 2;
+  for (const line of lines) {
+    pixelText(line, x + w / 2, ty, bodySize, "#eef4ff", "center");
+    ty += lineH;
+  }
+  pixelText(linkText, x + w / 2, y + h - 13, 13, "#7fc9ff", "center");
+
+  activeCuriosityLink = { x, y, w, h, url: cur.url };
 }
 
 /**

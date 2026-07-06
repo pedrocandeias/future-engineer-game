@@ -4,6 +4,23 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.8.0] — 2026-07-06
+
+feat(game): balões de curiosidades da U.Porto nos NPCs
+
+- Ao passar por um NPC de cenário, aparece um balão de fala com uma curiosidade
+  sobre a U.Porto e um link "SABER MAIS ▸" que abre a página oficial num
+  separador novo (`drawNpcCuriosities()` / `drawCuriosityBalloon()`). Cursor de
+  "mão" ao passar por cima.
+- Sortear aleatoriamente, a cada jogada/nível, que NPC e que curiosidade
+  aparecem em cada posição (`makeSceneNpcs()` / `state.sceneNpcs`), com ligações
+  a https://www.up.pt/acesso/conhece-a-universidade-do-porto/ e
+  https://www.up.pt/acesso/sempre-contigo/.
+- Afastar os inimigos das zonas dos NPCs para o jogador poder parar e ler os
+  balões sem ser atingido.
+- Nota: os textos usam factos gerais/públicos da U.Porto (as páginas oficiais
+  bloquearam o acesso automático); rever os números se necessário.
+
 ## [0.7.1] — 2026-07-06
 
 fix(character-select): fundo dos cartões em gradiente (como no seletor de nível)

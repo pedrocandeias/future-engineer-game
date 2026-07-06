@@ -4,6 +4,18 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.8.1] — 2026-07-06
+
+fix(mobile): controlos compactos e sem botão inútil
+
+- Redesenhar os controlos de toque: barra compacta com as direções (◀ ▶) à
+  esquerda e as ações (▼ agachar / ▲ saltar) à direita, numa só linha — deixam
+  de empilhar e de ocupar meio ecrã, e separam movimento de agachar/saltar.
+- Remover o botão "Começar" (redundante: os menus avançam tocando na própria
+  tela).
+- Passar a versionar também o `styles.css` no `<link>` para forçar o refresh da
+  cache do browser.
+
 ## [0.8.0] — 2026-07-06
 
 feat(game): balões de curiosidades da U.Porto nos NPCs

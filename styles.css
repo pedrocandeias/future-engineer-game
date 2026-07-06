@@ -58,51 +58,46 @@ canvas {
   text-align: center;
 }
 
+/* Mobile: a compact gamepad — directions on the left, actions on the right,
+   on a single row so it doesn't eat the screen. */
 .touch-controls {
   display: none;
-  grid-template-columns: minmax(136px, 1fr) minmax(220px, 1.35fr);
-  gap: 10px;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
   width: 100%;
+  padding: 0 6px;
   touch-action: none;
   user-select: none;
 }
 
 .touch-group {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(58px, 1fr));
-  gap: 10px;
-}
-
-.touch-group--actions {
-  grid-template-columns: repeat(3, minmax(70px, 1fr));
+  display: flex;
+  gap: 14px;
 }
 
 .touch-button {
-  min-height: 58px;
-  border: 2px solid #f5f8ff;
-  border-radius: 8px;
-  background: #171d24;
+  width: 60px;
+  height: 60px;
+  border: 2px solid rgba(245, 248, 255, 0.75);
+  border-radius: 50%;
+  background: rgba(23, 29, 36, 0.68);
   box-shadow:
-    inset 0 -4px 0 rgba(0, 0, 0, 0.45),
-    0 6px 18px rgba(0, 0, 0, 0.35);
+    inset 0 -4px 0 rgba(0, 0, 0, 0.4),
+    0 4px 14px rgba(0, 0, 0, 0.35);
   color: #f2f7ff;
-  font: 700 15px/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  letter-spacing: 0;
+  font: 700 24px/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   -webkit-tap-highlight-color: transparent;
 }
 
-.touch-button--move {
-  font-size: 22px;
-}
-
-.touch-button--start {
+.touch-button--jump {
   color: #8fd1ff;
 }
 
 .touch-button:active,
 .touch-button.is-pressed {
   transform: translateY(2px);
-  background: #263442;
+  background: rgba(38, 52, 66, 0.9);
   box-shadow:
     inset 0 -2px 0 rgba(0, 0, 0, 0.5),
     0 3px 10px rgba(0, 0, 0, 0.3);
@@ -118,42 +113,22 @@ canvas {
   }
 
   .touch-controls {
-    display: grid;
-  }
-}
-
-@media (max-width: 560px) {
-  .touch-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .touch-button {
-    min-height: 54px;
-    font-size: 14px;
-  }
-}
-
-@media (max-height: 430px) and (orientation: landscape) {
-  .shell {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 220px;
-    align-items: center;
+    display: flex;
   }
 
   canvas {
-    max-height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 100px);
+  }
+}
+
+@media (max-width: 380px) {
+  .touch-button {
+    width: 54px;
+    height: 54px;
+    font-size: 21px;
   }
 
-  .touch-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .touch-group,
-  .touch-group--actions {
-    grid-template-columns: repeat(2, minmax(58px, 1fr));
-  }
-
-  .touch-button--start {
-    grid-column: 1 / -1;
+  .touch-group {
+    gap: 10px;
   }
 }

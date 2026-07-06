@@ -72,7 +72,7 @@ Do not hand-edit the extracted PNGs — change the source image or the rects in 
   - **MINOR** (`0.1.0` → `0.2.0`): a new player-facing feature or notable addition — a new screen, mechanic, level, avatar, or enemy type.
   - **PATCH** (`0.1.0` → `0.1.1`): small changes — bug fixes, copy/visual tweaks, refactors, config edits, or minor UI additions (e.g. adding a version label). Most changes are patches; a change is only MINOR if it adds a distinct new feature.
 
-  When you bump `GAME_VERSION`, also update the `?v=` query on the `game.js` `<script>` tag in `index.html` to the same version — browsers cache `game.js` aggressively, so the query string is what forces players to load the new build.
+  When you bump `GAME_VERSION`, also update the `?v=` query on **both** the `game.js` `<script>` tag and the `styles.css` `<link>` in `index.html` to the same version — browsers cache these aggressively, so the query string is what forces players to load the new build.
 
 ## Gotchas
 

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Missão: Estudante Universitário do Futuro</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=0.8.1" />
   </head>
   <body>
     <main class="shell">
@@ -16,17 +16,16 @@
         <span>Enter: avançar, iniciar ou reiniciar</span>
       </div>
       <div class="touch-controls" aria-label="Controlos de toque">
-        <div class="touch-group">
-          <button class="touch-button touch-button--move" type="button" data-action="left" aria-label="Mover para a esquerda">◀</button>
-          <button class="touch-button touch-button--move" type="button" data-action="right" aria-label="Mover para a direita">▶</button>
+        <div class="touch-group touch-group--move">
+          <button class="touch-button touch-button--dir" type="button" data-action="left" aria-label="Mover para a esquerda">◀</button>
+          <button class="touch-button touch-button--dir" type="button" data-action="right" aria-label="Mover para a direita">▶</button>
         </div>
         <div class="touch-group touch-group--actions">
-          <button class="touch-button" type="button" data-action="jump" aria-label="Saltar">Saltar</button>
-          <button class="touch-button" type="button" data-action="crouch" aria-label="Agachar">Agachar</button>
-          <button class="touch-button touch-button--start" type="button" data-action="start" aria-label="Iniciar ou reiniciar">Começar</button>
+          <button class="touch-button touch-button--crouch" type="button" data-action="crouch" aria-label="Agachar">▼</button>
+          <button class="touch-button touch-button--jump" type="button" data-action="jump" aria-label="Saltar">▲</button>
         </div>
       </div>
     </main>
-    <script src="game.js?v=0.8.0"></script>
+    <script src="game.js?v=0.8.1"></script>
   </body>
 </html>

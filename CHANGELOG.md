@@ -4,6 +4,13 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.6.1] — 2026-07-06
+
+fix(hud): centrar o contador de tempo
+
+- Colocar o contador de tempo no centro da barra do topo (corações à esquerda,
+  recompensas à direita). Mover o indicador de god mode para não sobrepor.
+
 ## [0.6.0] — 2026-07-06
 
 feat(game): repetir nível após vitória e reorganizar o HUD

@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.6.1"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.6.2"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -1574,7 +1574,7 @@ function drawScene(levelId) {
   if (!tileBand(scene.floor, floorTop, H - floorTop)) { ctx.fillStyle = "#20242a"; ctx.fillRect(0, floorTop, levelLength, H - floorTop); }
 
   // Wall decorations (up high).
-  scatterProps(scene.wallArt, [260, 980, 1700, 2420, 3140, 3860], (img, x) => drawWallImage(img, x, 150, 92));
+  scatterProps(scene.wallArt, [260, 980, 1700, 2420, 3140, 3860], (img, x) => drawWallImage(img, x, 170, 92));
   scatterProps(scene.windows, [560, 1280, 2000, 2720, 3440], (img, x) => drawWallImage(img, x, groundY - 236, 120));
 
   // Subtle seat shadow just below the feet line so the floor still reads as one
@@ -1589,7 +1589,7 @@ function drawScene(levelId) {
   // Doors and props sit against the back wall, so they rest nearer the wall/floor
   // line (a bit above the ground line); NPCs stand out on the floor with the player.
   const propBase = groundY - 20;
-  scatterProps(scene.doors, [380, 1100, 1820, 2540, 3260, 3980], (img, x) => drawFloorImage(img, x, propBase, 178, 1));
+  scatterProps(scene.doors, [380, 1100, 1820, 2540, 3260, 3980], (img, x) => drawFloorImage(img, x, propBase - 10, 178, 1));
   scatterProps(scene.floorProps, [620, 1340, 2060, 2780, 3500], (img, x) => drawFloorImage(img, x, propBase, 116, 1));
   scatterProps(assets.npcPool, [260, 900, 1600, 2300, 3020, 3740], (img, x) => drawFloorImage(img, x, groundY, 122, 1));
 

@@ -4,6 +4,14 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.6.2] — 2026-07-06
+
+fix(scene): descer os quadros e subir as portas
+
+- Descer os quadros (wall art) 20px na vertical (top Y 150 → 170).
+- Subir as portas 10px (base em `propBase - 10`), sem afetar os restantes
+  adereços de chão.
+
 ## [0.6.1] — 2026-07-06
 
 fix(hud): centrar o contador de tempo

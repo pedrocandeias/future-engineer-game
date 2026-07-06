@@ -4,6 +4,21 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.5.2] — 2026-07-06
+
+fix(game): aproximar o cenário do exemplo (proporções e ligação chão/parede)
+
+- Ajustar as proporções do cenário ao exemplo de referência: descer o plano do
+  chão (`groundY` 420 → 466), tornar o teto mais alto e o chão uma faixa fina,
+  ficando a parede a dominar o enquadramento.
+- Cortar a base do próprio desenho de parede (que trazia chão e sombra de junção
+  embutidos) via `tileBand(..., cropBottomFrac)`, eliminando a faixa escura onde
+  a personagem pisava — parede e chão passam a ler como uma superfície contínua.
+- Verificado nos 7 níveis (arquitetura, artes, desporto, direito, engenharia,
+  letras, medicina).
+- Adicionar `?v=` (versão) ao `<script src="game.js">` em index.html para
+  forçar o refresh da cache do browser a cada build.
+
 ## [0.5.1] — 2026-07-02
 
 fix(game): ligar chão às paredes e melhorar a distribuição de decoração

@@ -7,11 +7,11 @@ const ctx = canvas.getContext("2d");
 
 const W = canvas.width;   // 960
 const H = canvas.height;  // 540
-const groundY = 420;      // Y coordinate of the ground plane (canvas-space, not world-space)
+const groundY = 466;      // Y coordinate of the ground plane (canvas-space, not world-space)
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.5.1"; // manter sincronizado com CHANGELOG.md
+const GAME_VERSION = "0.5.2"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -1494,11 +1494,20 @@ function drawScene(levelId) {
   ctx.save();
   ctx.translate(-state.camera, 0);
 
-  // Floor is pulled up ~22px to tuck under the wall's baseboard, so wall and
+  // Proportions matched to exemplo_jogo.png: a prominent ceiling, a tall wall
+  // that dominates the frame, and a thin floor strip the player stands on.
+  // The floor is pulled up ~12px to tuck under the wall's baseboard so wall and
   // floor read as one continuous surface (no dark gap between them).
-  const floorTop = groundY - 22;
-  if (!tileBand(scene.ceiling, 0, 64)) { ctx.fillStyle = "#1a1f26"; ctx.fillRect(0, 0, levelLength, 64); }
-  if (!tileBand(scene.wall, 64, floorTop - 64)) { ctx.fillStyle = "#2b3038"; ctx.fillRect(0, 64, levelLength, floorTop - 64); }
+  // Wall runs all the way down to the ground line; the floor is then drawn on
+  // top starting ~40px higher, covering the wall's dark baseboard so the player
+  // stands on the light floor tiles (not on a dark seam) — as in exemplo_jogo.png.
+  const ceilingH = 116;
+  const floorTop = groundY - 16;
+  if (!tileBand(scene.ceiling, 0, ceilingH)) { ctx.fillStyle = "#1a1f26"; ctx.fillRect(0, 0, levelLength, ceilingH); }
+  // The wall art is a full corridor scene that bakes in its own floor and a dark
+  // wall/floor junction shadow in its lower ~40%. Crop that off so only the wall
+  // proper is tiled and our own floor tiles provide the ground.
+  if (!tileBand(scene.wall, ceilingH, groundY - ceilingH, 0.4)) { ctx.fillStyle = "#2b3038"; ctx.fillRect(0, ceilingH, levelLength, groundY - ceilingH); }
   if (!tileBand(scene.floor, floorTop, H - floorTop)) { ctx.fillStyle = "#20242a"; ctx.fillRect(0, floorTop, levelLength, H - floorTop); }
 
   // Wall decorations (up high).
@@ -1521,12 +1530,18 @@ function drawScene(levelId) {
   ctx.restore();
 }
 
-/** Tile an image horizontally across the level at a fixed band height (keeps aspect). */
-function tileBand(image, top, bandH) {
+/**
+ * Tile an image horizontally across the level to fill a band `bandH` px tall.
+ * `cropBottomFrac` skips that fraction of the source's bottom rows before
+ * tiling — used to drop a baked-in dark baseboard so the wall meets the floor
+ * cleanly instead of showing a dark seam at the player's feet.
+ */
+function tileBand(image, top, bandH, cropBottomFrac = 0) {
   if (!imageReady(image)) return false;
-  const tileW = image.naturalWidth * (bandH / image.naturalHeight);
+  const srcH = Math.max(1, Math.round(image.naturalHeight * (1 - cropBottomFrac)));
+  const tileW = image.naturalWidth * (bandH / srcH);
   for (let x = 0; x < levelLength; x += tileW) {
-    drawImageClean(image, x, top, tileW, bandH);
+    ctx.drawImage(image, 0, 0, image.naturalWidth, srcH, x, top, tileW, bandH);
   }
   return true;
 }

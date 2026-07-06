@@ -4,6 +4,15 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.7.1] — 2026-07-06
+
+fix(character-select): fundo dos cartões em gradiente (como no seletor de nível)
+
+- Substituir o fundo preto dos cartões de personagem por um gradiente tingido,
+  igual ao dos cartões do seletor de nível. Cada personagem tem uma cor própria.
+- Tornar o helper do cartão genérico (`drawLevelCardPanel` → `drawGradientCard`),
+  partilhado pelos seletores de nível e de personagem.
+
 ## [0.7.0] — 2026-07-06
 
 feat(game): balão do inimigo e pausa a piscar ao ser atingido

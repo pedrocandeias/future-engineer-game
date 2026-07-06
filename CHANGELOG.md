@@ -4,6 +4,18 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.6.0] — 2026-07-06
+
+feat(game): repetir nível após vitória e reorganizar o HUD
+
+- Ao completar um nível, a celebração passa a perguntar "QUERES JOGAR DE NOVO?"
+  e o jogador é reencaminhado para o seletor de níveis (em vez de recomeçar o
+  mesmo nível).
+- Marcar os níveis já jogados no seletor com um crachá verde de "concluído"
+  (`completedLevels` + `drawCompletedBadge()`).
+- HUD: colocar os corações à esquerda seguidos do tempo, e as recompensas
+  (skills recolhidas) à direita. Remover o painel de pontuação "COMP.".
+
 ## [0.5.8] — 2026-07-06
 
 fix(hud): juntar vidas, tempo e recompensas na barra preta do topo

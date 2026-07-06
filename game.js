@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.5.8"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.6.0"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -135,6 +135,8 @@ const levelData = [
   { id: "medicina", label: "MEDICINA", name: "Faculdade de Medicina", color: "#ee5252", props: [{ src: "assets/cenarios/medicina/maca-medicina.png", front: true, scale: 1.22 }, "assets/cenarios/medicina/quadro-2-medicina.png", "assets/cenarios/medicina/quadro-medicina.png"] },
 ];
 let selectedLevelIndex = 0;
+// Indices of levels the player has already completed (persists for the session).
+const completedLevels = new Set();
 
 // In-game scenery per level: wide wall/floor/ceiling strips (tiled) plus prop
 // lists scattered along the corridor. `folder` is under assets/cenarios/; npc
@@ -498,7 +500,8 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     if (state.mode === "intro") goToCharacterSelect();
     else if (state.mode === "characterSelect") goToLevelSelect();
-    else if (state.mode === "levelSelect" || state.mode === "won" || state.mode === "gameover") resetGameToPlaying();
+    else if (state.mode === "won") goToLevelSelect();
+    else if (state.mode === "levelSelect" || state.mode === "gameover") resetGameToPlaying();
   }
 
   cheatBuffer.push(key);
@@ -552,7 +555,8 @@ canvas.addEventListener("pointerdown", (event) => {
       }
       return;
     }
-    resetGameToPlaying();
+    if (state.mode === "won") goToLevelSelect();
+    else resetGameToPlaying();
   }
 });
 
@@ -565,7 +569,8 @@ for (const button of document.querySelectorAll("[data-action]")) {
     if (action === "start") {
       if (state.mode === "intro") goToCharacterSelect();
       else if (state.mode === "characterSelect") goToLevelSelect();
-      else if (state.mode === "levelSelect" || state.mode === "won" || state.mode === "gameover") resetGameToPlaying();
+      else if (state.mode === "won") goToLevelSelect();
+      else if (state.mode === "levelSelect" || state.mode === "gameover") resetGameToPlaying();
       return;
     }
     if (state.mode === "characterSelect" && (action === "left" || action === "right")) {
@@ -745,6 +750,7 @@ function update() {
   if (allSkillsTaken) {
     state.mode = "won";
     state.winStartTime = state.time;
+    completedLevels.add(selectedLevelIndex); // mark this level as played/completed
     for (let i = 0; i < 6; i++) spawnBurst(W * (0.1 + i * 0.16), 80 + Math.random() * 200);
   }
 }
@@ -1293,7 +1299,31 @@ function drawLevelPicker() {
     ctx.clip();
     drawPropsVignette(assets.levelProps[i], levelData[i].props, rect.x + 12, rect.y + 12, rect.w - 24, rect.h - 24);
     ctx.restore();
+
+    if (completedLevels.has(i)) drawCompletedBadge(rect.x + rect.w - 12, rect.y + 12);
   }
+}
+
+/** Green "played" check badge shown on a level card the player has completed. */
+function drawCompletedBadge(cx, cy) {
+  ctx.save();
+  ctx.fillStyle = "#2fbf4f";
+  ctx.strokeStyle = "#0c3a18";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(cx - 6, cy + 1);
+  ctx.lineTo(cx - 1, cy + 6);
+  ctx.lineTo(cx + 7, cy - 5);
+  ctx.stroke();
+  ctx.restore();
 }
 
 /**
@@ -2136,20 +2166,20 @@ function getCharacterFrame(step, grounded) {
 }
 
 function drawHud() {
-  const collected = state.skills.filter((skill) => skill.taken).length;
   const barH = 66;
   const midY = 33; // vertical centre of the bar
   ctx.fillStyle = "rgba(0,0,0,0.86)";
   ctx.fillRect(0, 0, W, barH);
 
-  // Everything sits inside the top bar: time · hearts · rewards … score.
+  // Left: hearts, then the timer.
+  for (let i = 0; i < 3; i += 1) drawHeart(20 + i * 34, midY - 22, i < state.lives);
   const timeRemaining = getMissionTimeRemaining();
-  pixelText(formatTime(timeRemaining), 20, midY, 24, timeRemaining <= 10 ? "#ff6969" : "#ffffff", "left");
-  for (let i = 0; i < 3; i += 1) drawHeart(120 + i * 34, midY - 22, i < state.lives);
-  drawCollectedSkills(232, midY);
-  drawScorePanel(W - 116, 1, collected);
+  pixelText(formatTime(timeRemaining), 130, midY, 24, timeRemaining <= 10 ? "#ff6969" : "#ffffff", "left");
 
-  if (godMode) neonText("★ INVENCÍVEL", W - 150, midY, 16, "#ffd700", "right");
+  // Right: collected rewards.
+  drawCollectedSkills(W - 250, midY);
+
+  if (godMode) neonText("★ INVENCÍVEL", W / 2, midY, 16, "#ffd700", "center");
 }
 
 function drawCollectedSkills(startX, centerY) {
@@ -2174,12 +2204,6 @@ function drawCollectedSkills(startX, centerY) {
     }
     ctx.restore();
   }
-}
-
-function drawScorePanel(x, y, collected) {
-  drawPixelPanel(x, y, 104, 64, 7);
-  pixelText("COMP.", x + 52, y + 21, 15, "#ffffff", "center");
-  pixelText(String(collected * 100).padStart(4, "0"), x + 52, y + 47, state.scorePulse ? 24 : 20, "#ffffff", "center");
 }
 
 function drawHeart(x, y, active = true) {
@@ -2341,14 +2365,15 @@ function drawWin() {
     ctx.restore();
   }
 
-  // Body text and press-enter
+  // Body text, "play again?" prompt, and press-enter to pick another level.
   if (elapsed > 360) {
     ctx.globalAlpha = Math.min(1, (elapsed - 360) / 30);
-    pixelText("ESTÁS PRONTO PARA O FUTURO UNIVERSITÁRIO.", W / 2, 175, 18, "#ffffff", "center");
+    pixelText("ESTÁS PRONTO PARA O FUTURO UNIVERSITÁRIO.", W / 2, 168, 18, "#ffffff", "center");
+    neonText("QUERES JOGAR DE NOVO?", W / 2, 205, 22, "#7dff4b", "center");
     ctx.globalAlpha = 1;
   }
   if (elapsed > 420 && Math.sin(state.time * 5) > -0.2) {
-    pixelText("COMEÇAR / ENTER PARA JOGAR OUTRA VEZ", W / 2, 212, 16, "#8fd1ff", "center");
+    pixelText("ENTER / COMEÇAR PARA ESCOLHER OUTRO NÍVEL", W / 2, 240, 16, "#8fd1ff", "center");
   }
 }
 

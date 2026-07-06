@@ -29,12 +29,15 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   gap: 12px;
 }
 
 canvas {
-  width: 100%;
-  max-height: calc(100dvh - 148px);
+  /* Fit the largest 16:9 box that fits both the width and the available height,
+     so the game never stretches (the width is capped by the height budget). */
+  width: min(100%, calc((100dvh - 148px) * 16 / 9));
+  height: auto;
   aspect-ratio: 16 / 9;
   display: block;
   image-rendering: pixelated;
@@ -58,17 +61,17 @@ canvas {
   text-align: center;
 }
 
-/* Mobile: a compact gamepad — directions on the left, actions on the right,
-   on a single row so it doesn't eat the screen. */
+/* Mobile: a compact gamepad overlaid on the game — directions bottom-left,
+   actions bottom-right. Only the buttons capture taps, so the empty middle
+   still passes taps through to the canvas (menu navigation). */
 .touch-controls {
   display: none;
   justify-content: space-between;
   align-items: flex-end;
   gap: 12px;
-  width: 100%;
-  padding: 0 6px;
   touch-action: none;
   user-select: none;
+  pointer-events: none;
 }
 
 .touch-group {
@@ -81,13 +84,14 @@ canvas {
   height: 60px;
   border: 2px solid rgba(245, 248, 255, 0.75);
   border-radius: 50%;
-  background: rgba(23, 29, 36, 0.68);
+  background: rgba(23, 29, 36, 0.6);
   box-shadow:
     inset 0 -4px 0 rgba(0, 0, 0, 0.4),
     0 4px 14px rgba(0, 0, 0, 0.35);
   color: #f2f7ff;
   font: 700 24px/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
 }
 
 .touch-button--jump {
@@ -104,20 +108,23 @@ canvas {
 }
 
 @media (hover: none), (pointer: coarse), (max-width: 760px) {
-  .shell {
-    justify-content: space-between;
-  }
-
   .controls {
     display: none;
   }
 
-  .touch-controls {
-    display: flex;
+  /* Controls overlay the game (no longer take layout space), so the canvas can
+     use almost the full height while keeping its 16:9 ratio. */
+  canvas {
+    width: min(100%, calc((100dvh - 24px) * 16 / 9));
   }
 
-  canvas {
-    max-height: calc(100dvh - 100px);
+  .touch-controls {
+    display: flex;
+    position: fixed;
+    z-index: 10;
+    left: max(16px, env(safe-area-inset-left));
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
   }
 }
 

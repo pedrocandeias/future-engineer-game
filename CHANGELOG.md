@@ -4,6 +4,16 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.9.2] — 2026-07-06
+
+fix(mobile): corrigir esticão em landscape e sobrepor os controlos ao jogo
+
+- Corrigir o rácio do canvas: passa a caber o maior 16:9 dentro da largura E da
+  altura disponíveis, por isso deixa de esticar em landscape.
+- Sobrepor os controlos de toque ao jogo (fixos nos cantos inferiores; só os
+  botões captam toques, o meio deixa passar para a tela), libertando o ecrã para
+  o jogo.
+
 ## [0.9.1] — 2026-07-06
 
 fix(assets): atualizar sprites e corrigir frames do programador

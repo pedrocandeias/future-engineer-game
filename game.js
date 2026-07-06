@@ -82,12 +82,12 @@ const characterOptions = [
   } },
   { id: "programador", label: "PROGRAMADOR", color: "#56d7e8", image: "assets/personagens/personagem_3/student-man-it-idle.png", frames: {
     idle: "assets/personagens/personagem_3/student-man-it-idle.png",
-    walk: ["assets/personagens/personagem_3/student-man-it-step1.png", "assets/personagens/personagem_3/student-man-it-step2.png"],
+    walk: ["assets/personagens/personagem_3/student-it-man-step1.png", "assets/personagens/personagem_3/student-man-it-step2.png"],
     jump: "assets/personagens/personagem_3/student-man-it-jump.png",
     crouch: "assets/personagens/personagem_3/student-man-it-crawl.png",
   }, superFrames: {
     idle: "assets/personagens/personagem_3/super-student-man-it-idle.png",
-    walk: ["assets/personagens/personagem_3/super-student-man-it-step2.png"],
+    walk: ["assets/personagens/personagem_3/super-student-man-it-step1.png", "assets/personagens/personagem_3/super-student-man-it-step2.png"],
     jump: "assets/personagens/personagem_3/super-student-man-it-jump.png",
     crouch: "assets/personagens/personagem_3/super-student-man-it-crawl.png",
   } },

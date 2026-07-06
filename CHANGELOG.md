@@ -4,6 +4,18 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.9.1] — 2026-07-06
+
+fix(assets): atualizar sprites e corrigir frames do programador
+
+- Atualizar os sprites dos NPCs (`assets/npc/`) e do idle da personagem em
+  cadeira de rodas (re-exportados).
+- personagem_3 (programador): apontar o walk normal para
+  `student-it-man-step1.png` (o `student-man-it-step1.png` foi removido) e
+  acrescentar `super-student-man-it-step1.png` ao walk da versão "super".
+- Adicionar as imagens de referência de design (`exemplo_jogo.png`,
+  `cenario_exemplo.png`).
+
 ## [0.9.0] — 2026-07-06
 
 feat(game): painel final ao completar todos os níveis

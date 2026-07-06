@@ -4,6 +4,15 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.5.8] — 2026-07-06
+
+fix(hud): juntar vidas, tempo e recompensas na barra preta do topo
+
+- Aumentar a barra preta do topo (48 → 66 px) e passar a desenhar tudo dentro
+  dela, numa linha: tempo · vidas (corações) · recompensas recolhidas ·
+  pontuação (COMP). As vidas e as recompensas deixam de flutuar por baixo da
+  barra, sobre o cenário.
+
 ## [0.5.7] — 2026-07-06
 
 fix(hud): remover o título do nível do HUD

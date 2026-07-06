@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.5.7"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.5.8"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -2137,14 +2137,19 @@ function getCharacterFrame(step, grounded) {
 
 function drawHud() {
   const collected = state.skills.filter((skill) => skill.taken).length;
+  const barH = 66;
+  const midY = 33; // vertical centre of the bar
   ctx.fillStyle = "rgba(0,0,0,0.86)";
-  ctx.fillRect(0, 0, W, 48);
+  ctx.fillRect(0, 0, W, barH);
+
+  // Everything sits inside the top bar: time · hearts · rewards … score.
   const timeRemaining = getMissionTimeRemaining();
-  pixelText(formatTime(timeRemaining), 24, 36, 24, timeRemaining <= 10 ? "#ff6969" : "#ffffff", "left");
-  drawScorePanel(W - 128, 16, collected);
-  for (let i = 0; i < 3; i += 1) drawHeart(42 + i * 36, 68, i < state.lives);
-  drawCollectedSkills(160, 68);
-  if (godMode) neonText("★ INVENCÍVEL", W / 2, 30, 18, "#ffd700", "center");
+  pixelText(formatTime(timeRemaining), 20, midY, 24, timeRemaining <= 10 ? "#ff6969" : "#ffffff", "left");
+  for (let i = 0; i < 3; i += 1) drawHeart(120 + i * 34, midY - 22, i < state.lives);
+  drawCollectedSkills(232, midY);
+  drawScorePanel(W - 116, 1, collected);
+
+  if (godMode) neonText("★ INVENCÍVEL", W - 150, midY, 16, "#ffd700", "right");
 }
 
 function drawCollectedSkills(startX, centerY) {

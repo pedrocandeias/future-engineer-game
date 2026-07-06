@@ -4,6 +4,13 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.5.7] — 2026-07-06
+
+fix(hud): remover o título do nível do HUD
+
+- Deixar de mostrar o nome do nível (ARQUITETURA, BELAS ARTES, etc.) no centro
+  do topo do HUD durante o jogo. O toast "MISSÃO INICIADA!" mantém-se.
+
 ## [0.5.6] — 2026-07-06
 
 feat(intro): virar o 3.º NPC à direita e esvaziar o 4.º lugar

@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.5.6"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.5.7"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -2141,7 +2141,6 @@ function drawHud() {
   ctx.fillRect(0, 0, W, 48);
   const timeRemaining = getMissionTimeRemaining();
   pixelText(formatTime(timeRemaining), 24, 36, 24, timeRemaining <= 10 ? "#ff6969" : "#ffffff", "left");
-  pixelText(levelData[selectedLevelIndex].label, W / 2, 30, 15, levelData[selectedLevelIndex].color, "center");
   drawScorePanel(W - 128, 16, collected);
   for (let i = 0; i < 3; i += 1) drawHeart(42 + i * 36, 68, i < state.lives);
   drawCollectedSkills(160, 68);

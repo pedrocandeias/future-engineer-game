@@ -4,6 +4,17 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.5.1] — 2026-07-02
+
+fix(game): ligar chão às paredes e melhorar a distribuição de decoração
+
+- Puxar o chão ~22px para encaixar no rodapé da parede e substituir a faixa
+  escura de contacto por uma sombra ténue, para o chão e a parede lerem como
+  uma superfície contínua.
+- Espaçar portas, adereços e NPCs num único calendário para não se sobreporem.
+- Decorar os níveis com uma maior variedade de NPCs, a partir de um pool com
+  todos os de `assets/npc/` (deixam de estar presos ao tema do nível).
+
 ## [0.5.0] — 2026-07-02
 
 feat(game): ligar personagem, cenário, rewards, inimigos e NPCs ao jogo

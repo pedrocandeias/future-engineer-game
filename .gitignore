@@ -1,0 +1,5 @@
+# Playwright MCP verification output
+.playwright-mcp/
+
+# Ad-hoc screenshot scratch files (verification shots live at the repo root)
+/*.png

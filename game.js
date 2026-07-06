@@ -11,7 +11,7 @@ const groundY = 420;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.5.0"; // manter sincronizado com CHANGELOG.md
+const GAME_VERSION = "0.5.1"; // manter sincronizado com CHANGELOG.md
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -1494,26 +1494,29 @@ function drawScene(levelId) {
   ctx.save();
   ctx.translate(-state.camera, 0);
 
-  // Wall extends behind the floor line so wall and floor read as one surface.
+  // Floor is pulled up ~22px to tuck under the wall's baseboard, so wall and
+  // floor read as one continuous surface (no dark gap between them).
+  const floorTop = groundY - 22;
   if (!tileBand(scene.ceiling, 0, 64)) { ctx.fillStyle = "#1a1f26"; ctx.fillRect(0, 0, levelLength, 64); }
-  if (!tileBand(scene.wall, 64, groundY - 64 + 10)) { ctx.fillStyle = "#2b3038"; ctx.fillRect(0, 64, levelLength, groundY - 64); }
-  if (!tileBand(scene.floor, groundY, H - groundY)) { ctx.fillStyle = "#20242a"; ctx.fillRect(0, groundY, levelLength, H - groundY); }
+  if (!tileBand(scene.wall, 64, floorTop - 64)) { ctx.fillStyle = "#2b3038"; ctx.fillRect(0, 64, levelLength, floorTop - 64); }
+  if (!tileBand(scene.floor, floorTop, H - floorTop)) { ctx.fillStyle = "#20242a"; ctx.fillRect(0, floorTop, levelLength, H - floorTop); }
 
   // Wall decorations (up high).
   scatterProps(scene.wallArt, [260, 980, 1700, 2420, 3140, 3860], (img, x) => drawWallImage(img, x, 150, 92));
   scatterProps(scene.windows, [560, 1280, 2000, 2720, 3440], (img, x) => drawWallImage(img, x, groundY - 236, 120));
 
-  // Contact shadow along the wall/floor junction binds them together.
-  const junction = ctx.createLinearGradient(0, groundY - 8, 0, groundY + 26);
-  junction.addColorStop(0, "rgba(0,0,0,0.45)");
+  // Subtle seat shadow just below the feet line so the floor still reads as one
+  // surface with the wall (kept faint — a heavy band makes the floor look detached).
+  const junction = ctx.createLinearGradient(0, floorTop, 0, floorTop + 12);
+  junction.addColorStop(0, "rgba(0,0,0,0.24)");
   junction.addColorStop(1, "rgba(0,0,0,0)");
   ctx.fillStyle = junction;
-  ctx.fillRect(0, groundY - 8, levelLength, 34);
+  ctx.fillRect(0, floorTop, levelLength, 12);
 
   // Floor-anchored items on one spaced schedule (doors / props / NPCs interleaved).
   scatterProps(scene.doors, [380, 1100, 1820, 2540, 3260, 3980], (img, x) => drawFloorImage(img, x, groundY, 178, 1));
   scatterProps(scene.floorProps, [620, 1340, 2060, 2780, 3500], (img, x) => drawFloorImage(img, x, groundY, 116, 1));
-  scatterProps(assets.npcPool, [200, 900, 1600, 2300, 3020, 3740], (img, x) => drawFloorImage(img, x, groundY, 122, 1));
+  scatterProps(assets.npcPool, [260, 900, 1600, 2300, 3020, 3740], (img, x) => drawFloorImage(img, x, groundY, 122, 1));
 
   ctx.restore();
 }

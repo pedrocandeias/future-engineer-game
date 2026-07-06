@@ -7,11 +7,11 @@ const ctx = canvas.getContext("2d");
 
 const W = canvas.width;   // 960
 const H = canvas.height;  // 540
-const groundY = 466;      // Y coordinate of the ground plane (canvas-space, not world-space)
+const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not world-space)
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.5.2"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.5.3"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -1502,7 +1502,10 @@ function drawScene(levelId) {
   // top starting ~40px higher, covering the wall's dark baseboard so the player
   // stands on the light floor tiles (not on a dark seam) — as in exemplo_jogo.png.
   const ceilingH = 116;
-  const floorTop = groundY - 16;
+  // Keep the floor's visual top at ~450 regardless of groundY, so lowering the
+  // ground line just plants the cast a little deeper on the floor (as requested)
+  // without changing the ceiling/wall/floor proportions.
+  const floorTop = groundY - 30;
   if (!tileBand(scene.ceiling, 0, ceilingH)) { ctx.fillStyle = "#1a1f26"; ctx.fillRect(0, 0, levelLength, ceilingH); }
   // The wall art is a full corridor scene that bakes in its own floor and a dark
   // wall/floor junction shadow in its lower ~40%. Crop that off so only the wall
@@ -1523,8 +1526,11 @@ function drawScene(levelId) {
   ctx.fillRect(0, floorTop, levelLength, 12);
 
   // Floor-anchored items on one spaced schedule (doors / props / NPCs interleaved).
-  scatterProps(scene.doors, [380, 1100, 1820, 2540, 3260, 3980], (img, x) => drawFloorImage(img, x, groundY, 178, 1));
-  scatterProps(scene.floorProps, [620, 1340, 2060, 2780, 3500], (img, x) => drawFloorImage(img, x, groundY, 116, 1));
+  // Doors and props sit against the back wall, so they rest nearer the wall/floor
+  // line (a bit above the ground line); NPCs stand out on the floor with the player.
+  const propBase = groundY - 20;
+  scatterProps(scene.doors, [380, 1100, 1820, 2540, 3260, 3980], (img, x) => drawFloorImage(img, x, propBase, 178, 1));
+  scatterProps(scene.floorProps, [620, 1340, 2060, 2780, 3500], (img, x) => drawFloorImage(img, x, propBase, 116, 1));
   scatterProps(assets.npcPool, [260, 900, 1600, 2300, 3020, 3740], (img, x) => drawFloorImage(img, x, groundY, 122, 1));
 
   ctx.restore();

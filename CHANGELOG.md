@@ -4,6 +4,19 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.5.3] — 2026-07-06
+
+fix(game): plantar a personagem, NPCs, rewards e inimigos um pouco mais abaixo
+
+- Descer o plano do chão (`groundY` 466 → 480) para plantar a personagem, os
+  NPCs, as skills e os inimigos um pouco mais abaixo, mais assentes nas
+  tijoleiras.
+- Manter o topo visual do chão em ~450 (`floorTop = groundY - 30`), para as
+  proporções teto/parede/chão não mudarem.
+- Ancorar as portas e os adereços de chão um pouco acima do plano do chão
+  (`groundY - 20`), junto à linha parede/chão, para não afundarem — os NPCs é
+  que ficam à frente, no chão, com a personagem.
+
 ## [0.5.2] — 2026-07-06
 
 fix(game): aproximar o cenário do exemplo (proporções e ligação chão/parede)

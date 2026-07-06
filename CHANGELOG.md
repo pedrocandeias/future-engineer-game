@@ -4,6 +4,15 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.5.5] — 2026-07-06
+
+feat(intro): usar as variantes "_right" dos primeiros NPCs
+
+- Trocar os dois primeiros NPCs da fila da intro pelas variantes viradas à
+  direita: `student-woman_right.png` e `architect-man_right.png`.
+- O terceiro (doctor-woman) fica na versão normal por ainda não existir uma
+  variante `_right` (só há `doctor-woman_left.png`).
+
 ## [0.5.4] — 2026-07-06
 
 feat(game): god mode (Konami) troca a personagem para a versão "super"

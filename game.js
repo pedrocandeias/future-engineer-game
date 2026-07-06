@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.5.4"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.5.5"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -241,8 +241,8 @@ const elementFiles = {
 // students/professionals from `assets/npc/` that fade in one by one.
 const introBackgroundFile = "assets/intro/introbackground.png";
 const introNpcFiles = [
-  "assets/npc/student-woman.png",
-  "assets/npc/architect-man.png",
+  "assets/npc/student-woman_right.png",
+  "assets/npc/architect-man_right.png",
   "assets/npc/doctor-woman.png",
   "assets/npc/eng-man.png",
   "assets/npc/arts-woman.png",

@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.10.0"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.10.1"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -480,14 +480,14 @@ function reset() {
     // invincible) for ~10s. One per level, floating high (jump to reach), placed
     // in a random gap between the NPC reading zones so it never hides a curiosity.
     superReward: { x: [1250, 1950, 2650][Math.floor(Math.random() * 3)], y: groundY - 130, taken: false },
-    superTimer: 0, // frames of "super" left (600 = 10s at 60 fps)
+    superTimer: 0, // frames of "super" left (240 = 4s at 60 fps)
     // low kinds (y = groundY-55): player must jump over
     // high kinds (y = groundY-105): player must crouch under
     // Distractions are kept out of the NPC "reading zones" (sceneNpcXs ± ~200)
     // so the player can stop by an NPC and read its curiosity balloon.
     distractions: [
       { startX: 500,  x: 500,  y: groundY -  55, w: 44, h: 44, vx: 1.4, dir:  1, range:  90, kind: "phone" },
-      { startX: 620,  x: 620,  y: groundY - 105, w: 44, h: 44, vx: 1.2, dir: -1, range:  70, kind: "sleep" },
+      { startX: 780,  x: 780,  y: groundY - 105, w: 44, h: 44, vx: 1.2, dir: -1, range:  70, kind: "sleep" },
       { startX: 1140, x: 1140, y: groundY -  55, w: 44, h: 44, vx: 1.6, dir:  1, range: 100, kind: "heart" },
       { startX: 1290, x: 1290, y: groundY - 105, w: 44, h: 44, vx: 1.3, dir: -1, range:  90, kind: "chat"  },
       { startX: 1840, x: 1840, y: groundY -  55, w: 44, h: 44, vx: 1.8, dir:  1, range: 100, kind: "phone" },
@@ -818,9 +818,9 @@ function update() {
   const sr = state.superReward;
   if (!sr.taken && intersects(p, { x: sr.x - 30, y: sr.y - 30, w: 60, h: 60 })) {
     sr.taken = true;
-    state.superTimer = 600; // 10 seconds
+    state.superTimer = 240; // 4 seconds
     state.scorePulse = 18;
-    state.toast = { title: "MODO SUPER!", body: "Invencível durante 10 segundos!", ttl: 150 };
+    state.toast = { title: "MODO SUPER!", body: "Invencível durante 4 segundos!", ttl: 150 };
   }
 
   for (const d of state.distractions) {

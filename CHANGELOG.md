@@ -4,6 +4,14 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.10.1] — 2026-07-07
+
+tweak(game): encurtar o "modo super" e afastar os dois primeiros inimigos
+
+- Reduzir a duração do power-up "modo super" de 10 para 4 segundos.
+- Afastar os dois primeiros inimigos do início do nível (o segundo passa de
+  x=620 para x=780) para dar mais margem ao jogador logo no arranque.
+
 ## [0.10.0] — 2026-07-07
 
 feat(game): power-up "modo super" temporário apanhável no nível

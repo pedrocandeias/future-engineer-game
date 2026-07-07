@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.7.0"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.9.3"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -58,7 +58,7 @@ let selectedAvatarIndex = 0;
 // character folder under assets/personagens/ (normal versions only, not "super").
 // Not yet wired into gameplay — only the selection is stored for now.
 const characterOptions = [
-  { id: "professor", label: "PROFESSOR", color: "#a979ff", image: "assets/personagens/personagem_1/teacher-idle.png", frames: {
+  { id: "professor", label: "CARLA", color: "#a979ff", image: "assets/personagens/personagem_1/teacher-idle.png", frames: {
     idle: "assets/personagens/personagem_1/teacher-idle.png",
     walk: ["assets/personagens/personagem_1/teacher-step1.png", "assets/personagens/personagem_1/teacher-idle.png"],
     jump: "assets/personagens/personagem_1/teacher-jump.png",
@@ -69,7 +69,7 @@ const characterOptions = [
     jump: "assets/personagens/personagem_1/super-teacher-jump.png",
     crouch: "assets/personagens/personagem_1/teacher-super-crawl.png",
   } },
-  { id: "estudante", label: "ESTUDANTE", color: "#ec6fb0", image: "assets/personagens/personagem_2/student-woman-idle.png", frames: {
+  { id: "estudante", label: "JOANA", color: "#ec6fb0", image: "assets/personagens/personagem_2/student-woman-idle.png", frames: {
     idle: "assets/personagens/personagem_2/student-woman-idle.png",
     walk: ["assets/personagens/personagem_2/student-woman-step1.png", "assets/personagens/personagem_2/student-woman-step2.png"],
     jump: "assets/personagens/personagem_2/student-woman-jump.png",
@@ -80,7 +80,7 @@ const characterOptions = [
     jump: "assets/personagens/personagem_2/super-student-woman-jump.png",
     crouch: "assets/personagens/personagem_2/super-student-woman-crawl.png",
   } },
-  { id: "programador", label: "PROGRAMADOR", color: "#56d7e8", image: "assets/personagens/personagem_3/student-man-it-idle.png", frames: {
+  { id: "programador", label: "PEDRO", color: "#56d7e8", image: "assets/personagens/personagem_3/student-man-it-idle.png", frames: {
     idle: "assets/personagens/personagem_3/student-man-it-idle.png",
     walk: ["assets/personagens/personagem_3/student-it-man-step1.png", "assets/personagens/personagem_3/student-man-it-step2.png"],
     jump: "assets/personagens/personagem_3/student-man-it-jump.png",
@@ -91,7 +91,7 @@ const characterOptions = [
     jump: "assets/personagens/personagem_3/super-student-man-it-jump.png",
     crouch: "assets/personagens/personagem_3/super-student-man-it-crawl.png",
   } },
-  { id: "colega", label: "ESTUDANTE", color: "#6ee381", image: "assets/personagens/personagem_4/student-wheelchair-idle.png", frames: {
+  { id: "colega", label: "TIAGO", color: "#6ee381", image: "assets/personagens/personagem_4/student-wheelchair-idle.png", frames: {
     idle: "assets/personagens/personagem_4/student-wheelchair-idle.png",
     walk: ["assets/personagens/personagem_4/student-wheelchair-step1.png", "assets/personagens/personagem_4/student-wheelchair-step2.png"],
     jump: "assets/personagens/personagem_4/student-wheelchair-jump.png",
@@ -102,7 +102,7 @@ const characterOptions = [
     jump: "assets/personagens/personagem_4/super-student-wheelchair-jump.png",
     crouch: "assets/personagens/personagem_4/super-student-wheelchair-crawl.png",
   } },
-  { id: "caloiro", label: "CALOIRO", image: "assets/personagens/personagem_5/student-man-2-idle.png", frames: {
+  { id: "caloiro", label: "JORGE", image: "assets/personagens/personagem_5/student-man-2-idle.png", frames: {
     idle: "assets/personagens/personagem_5/student-man-2-idle.png",
     walk: ["assets/personagens/personagem_5/student-man-2-step1.png", "assets/personagens/personagem_5/student-man-2-step2.png"],
     jump: "assets/personagens/personagem_5/student-man-2-jump.png",

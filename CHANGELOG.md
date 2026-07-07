@@ -4,6 +4,15 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.9.3] — 2026-07-07
+
+feat(personagens): dar nomes próprios às personagens jogáveis
+
+- Substituir as etiquetas genéricas dos personagens no ecrã de seleção por nomes
+  próprios: PROFESSOR→CARLA, ESTUDANTE→JOANA, PROGRAMADOR→PEDRO, ESTUDANTE→TIAGO,
+  CALOIRO→JORGE. Os `id` internos mantêm-se inalterados.
+- Corrigir o `GAME_VERSION`, que estava dessincronizado em 0.7.0.
+
 ## [0.9.2] — 2026-07-06
 
 fix(mobile): corrigir esticão em landscape e sobrepor os controlos ao jogo

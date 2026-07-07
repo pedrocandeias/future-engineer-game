@@ -11,7 +11,7 @@ const groundY = 480;      // Y coordinate of the ground plane (canvas-space, not
 const levelLength = 4200; // total scrollable world width in pixels
 const missionTimeLimit = 120; // seconds available to complete the mission
 const assetBase = "assets/transparent_elements";
-const GAME_VERSION = "0.7.0"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
+const GAME_VERSION = "0.10.0"; // manter sincronizado com CHANGELOG.md e com ?v= em index.html
 
 const skillData = [
   { x: 540, name: "CURIOSIDADE", label: "CURIOSIDADE +1", icon: "atom", image: "assets/rewards/analytics.png", color: "#55a7ff" },
@@ -476,6 +476,11 @@ function reset() {
     particles: [],
     winStartTime: 0,
     hitPause: null, // { name, ttl } — brief blinking freeze after an enemy hit
+    // Special power-up: collecting it turns the player "super" (super sprite +
+    // invincible) for ~10s. One per level, floating high (jump to reach), placed
+    // in a random gap between the NPC reading zones so it never hides a curiosity.
+    superReward: { x: [1250, 1950, 2650][Math.floor(Math.random() * 3)], y: groundY - 130, taken: false },
+    superTimer: 0, // frames of "super" left (600 = 10s at 60 fps)
     // low kinds (y = groundY-55): player must jump over
     // high kinds (y = groundY-105): player must crouch under
     // Distractions are kept out of the NPC "reading zones" (sceneNpcXs ± ~200)
@@ -810,13 +815,21 @@ function update() {
     }
   }
 
+  const sr = state.superReward;
+  if (!sr.taken && intersects(p, { x: sr.x - 30, y: sr.y - 30, w: 60, h: 60 })) {
+    sr.taken = true;
+    state.superTimer = 600; // 10 seconds
+    state.scorePulse = 18;
+    state.toast = { title: "MODO SUPER!", body: "Invencível durante 10 segundos!", ttl: 150 };
+  }
+
   for (const d of state.distractions) {
     d.x += d.vx * d.dir;
     if (d.x >= d.startX + d.range) d.dir = -1;
     if (d.x <= d.startX) d.dir = 1;
   }
 
-  if (state.invincible <= 0 && !godMode) {
+  if (state.invincible <= 0 && !isSuper()) {
     for (const d of state.distractions) {
       if (intersects(p, d)) {
         state.lives -= 1;
@@ -838,6 +851,7 @@ function update() {
     }
   }
   state.invincible = Math.max(0, state.invincible - 1);
+  state.superTimer = Math.max(0, state.superTimer - 1);
 
   if (state.toast) {
     state.toast.ttl -= 1;
@@ -1923,6 +1937,42 @@ function drawSkills() {
     drawSign(skill.name, skill.x - 105, 96, Math.max(150, skill.name.length * 13));
     drawSkillIcon(skill.x, skill.y + bob, skill.icon, skill.color);
   }
+  if (!state.superReward.taken) {
+    const sr = state.superReward;
+    drawSuperReward(sr.x, sr.y + Math.sin(state.time * 4 + sr.x) * 7);
+  }
+  ctx.restore();
+}
+
+/** The special "super" power-up: a pulsing gold star with a glowing halo. */
+function drawSuperReward(cx, cy) {
+  const pulse = 1 + Math.sin(state.time * 6) * 0.12;
+  const r = 22 * pulse;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.shadowColor = "#ffd700";
+  ctx.shadowBlur = 22 + Math.sin(state.time * 6) * 10;
+  // Halo
+  ctx.fillStyle = "rgba(255,215,0,0.18)";
+  ctx.beginPath();
+  ctx.arc(0, 0, r * 1.6, 0, Math.PI * 2);
+  ctx.fill();
+  // Five-point star
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const rad = i % 2 === 0 ? r : r * 0.44;
+    const ang = -Math.PI / 2 + (i * Math.PI) / 5;
+    const x = Math.cos(ang) * rad;
+    const y = Math.sin(ang) * rad;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = "#ffd94a";
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#b8860b";
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -2091,16 +2141,16 @@ function drawPlayer() {
   // Flash every 6 frames while invincible. During the hit pause `invincible` is
   // frozen, so drive the blink off the pause countdown instead.
   const flashCounter = state.hitPause ? state.hitPause.ttl : state.invincible;
-  if (!godMode && flashCounter > 0 && Math.floor(flashCounter / 6) % 2 === 0) return;
+  if (!isSuper() && flashCounter > 0 && Math.floor(flashCounter / 6) % 2 === 0) return;
   const p = state.player;
-  if (godMode) {
+  if (isSuper()) {
     ctx.save();
     ctx.shadowColor = "#ffd700";
     ctx.shadowBlur = 18 + Math.sin(state.time * 7) * 10;
     ctx.globalAlpha = 0.82 + Math.sin(state.time * 9) * 0.18;
   }
   drawPlayerSprite(p.x - state.camera, p.y, p.facing, p.step, p.grounded ? 1 : 0);
-  if (godMode) ctx.restore();
+  if (isSuper()) ctx.restore();
 }
 
 /**
@@ -2263,11 +2313,16 @@ function hasCharacterFrames() {
   return imageReady(assets.playCharacters[selectedCharacterIndex].idle);
 }
 
+/** True while the player is "super": Konami god mode, or the timed power-up. */
+function isSuper() {
+  return godMode || state.superTimer > 0;
+}
+
 function getCharacterFrame(step, grounded) {
   const character = assets.playCharacters[selectedCharacterIndex];
-  // God mode (Konami) swaps to the "super" sprite set — fall back to normal if
-  // a super frame hasn't loaded yet.
-  const set = (godMode && character.super) ? character.super : character;
+  // "Super" (Konami god mode or the timed power-up) swaps to the super sprite
+  // set — fall back to normal if a super frame hasn't loaded yet.
+  const set = (isSuper() && character.super) ? character.super : character;
   const moving = Math.abs(state.player.vx) > 0.1;
   if (state.player.crouching && imageReady(set.crouch)) return set.crouch;
   if (!grounded && imageReady(set.jump)) return set.jump;
@@ -2292,6 +2347,7 @@ function drawHud() {
   drawCollectedSkills(W - 250, midY);
 
   if (godMode) neonText("★ INVENCÍVEL", 300, midY, 16, "#ffd700", "center");
+  else if (state.superTimer > 0) neonText(`★ SUPER ${Math.ceil(state.superTimer / 60)}s`, 300, midY, 16, "#ffd700", "center");
 }
 
 function drawCollectedSkills(startX, centerY) {

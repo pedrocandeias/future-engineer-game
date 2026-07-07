@@ -4,6 +4,20 @@ Todas as alterações relevantes deste projeto são documentadas neste ficheiro.
 Cada entrada indica a **data** e a **versão** correspondente, e descreve as
 alterações no formato de mensagens de commit de git.
 
+## [0.10.0] — 2026-07-07
+
+feat(game): power-up "modo super" temporário apanhável no nível
+
+- Adicionar uma recompensa especial (estrela dourada com halo pulsante) que
+  flutua num dos espaços livres do nível, entre as zonas dos NPCs, e a uma
+  altura que obriga a saltar para a apanhar.
+- Ao apanhá-la, a personagem fica "super" durante 10 segundos: passa ao sprite
+  super (o mesmo do modo Konami) com brilho dourado e fica invencível — os
+  inimigos deixam de a magoar nesse período.
+- Mostrar a contagem decrescente "★ SUPER Xs" na barra superior e um aviso
+  "MODO SUPER!" ao apanhar a recompensa.
+- Sincronizar `GAME_VERSION` (estava em 0.7.0) com o changelog e o `?v=`.
+
 ## [0.9.2] — 2026-07-06
 
 fix(mobile): corrigir esticão em landscape e sobrepor os controlos ao jogo
